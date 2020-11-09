@@ -1,4 +1,4 @@
-# Шаблон Django проекта для Docker Compose.
+# Шаблон Docker Compose для Django проекта.
 
 1. Postgresql
 2. Redis
