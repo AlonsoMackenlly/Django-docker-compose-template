@@ -1,0 +1,66 @@
+version: '3.7'
+
+volumes:
+    site:
+    db:
+        driver: local
+
+
+services:
+    redis:
+        image: redis:5-alpine
+        container_name: redis
+        networks:
+            - bot-network
+    celery:
+        build: ./app
+        container_name: celery
+        command: celery worker -A config --loglevel=info --logfile=logs/celery.log
+        volumes:
+            - ${ROOT_PATH}/app:/code/app
+        environment:
+            - CGO_ENABLED=0
+            - DEBUG=0
+            - SECRET_KEY=o6io*62524iwm8hgjr0gq3a2m@tsc@3c_p_gu#p6vqe3vvez&b
+            - CELERY_BROKER=redis://redis:6379/0
+            - CELERY_BACKEND=redis://redis:6379/0
+            - PYTHONDONTWRITEBYTECODE=1
+        depends_on:
+            - python-bot
+            - redis
+        networks:
+            - bot-network
+    db:
+        image: postgres
+        container_name: db
+        environment:
+            - POSTGRES_DB=bot_db
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=GpvH0PF1aG
+        networks:
+            - bot-network
+        restart: always
+    python-bot:
+        build: ./app
+        command: python manage.py runserver 0:80
+        container_name: python-bot
+        environment:
+            - CGO_ENABLED=0
+            - DEBUG=0
+            - SECRET_KEY=o6io*62524iwm8hgjr0gq3a2m@tsc@3c_p_gu#p6vqe3vvez&b
+            - CELERY_BROKER=redis://redis:6379/0
+            - CELERY_BACKEND=redis://redis:6379/0
+            - PYTHONDONTWRITEBYTECODE=1
+        depends_on:
+            - db
+        volumes:
+            - ${ROOT_PATH}/app:/code/app
+        ports:
+            - '85:80'
+        networks:
+            - bot-network
+        restart: on-failure
+
+networks:
+    bot-network:
+        driver: bridge

@@ -1,0 +1,10 @@
+psycopg2-binary
+python-telegram-bot
+celery==4.4.1
+Django
+tornado==6.1
+flower==0.9.5
+redis==3.4.1
+pytest==5.4.1
+pytest-django==3.8.0
+django-debug-toolbar
